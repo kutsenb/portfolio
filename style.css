@@ -22,7 +22,6 @@
   --link: #6ea8fe;
   --link-visited: #a48cf2;
   --border: #2c2f31;
-  --avatar-ring: #d9502f;
   --max-width: 760px;
 }
 
@@ -33,7 +32,6 @@
   --link: #1a56db;
   --link-visited: #6f42c1;
   --border: #e1e4e8;
-  --avatar-ring: #d9502f;
 }
 
 /* ---------------------------------------------------------------------
@@ -101,13 +99,9 @@ a:hover {
   height: 76px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--avatar-ring);
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 18px;
   overflow: hidden;
 }
 
