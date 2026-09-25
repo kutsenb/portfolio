@@ -23,7 +23,7 @@
   --link-visited: #a48cf2;
   --border: #2c2f31;
   --avatar-ring: #d9502f;
-  --max-width: 640px;
+  --max-width: 760px;
 }
 
 :root[data-theme="light"] {
@@ -97,8 +97,8 @@ a:hover {
 }
 
 .avatar {
-  width: 56px;
-  height: 56px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--avatar-ring);
@@ -127,10 +127,10 @@ a:hover {
 
 @keyframes avatar-sway {
   from {
-    transform: rotate(-3deg);
+    transform: rotate(-5deg);
   }
   to {
-    transform: rotate(3deg);
+    transform: rotate(5deg);
   }
 }
 
@@ -149,7 +149,7 @@ a:hover {
 
 .profile-text .name {
   font-weight: 600;
-  font-size: 17px;
+  font-size: 21px;
   color: var(--text);
 }
 
