@@ -16,13 +16,13 @@
    needs to know which theme is active.
    --------------------------------------------------------------------- */
 :root {
-  --bg: #181a1b;
+  --bg: #1c1c1c;
   --text: #d7d9db;
   --text-muted: #9a9ea3;
   --link: #6fa3d0;
   --link-visited: #a48cf2;
-  --border: #2c2f31;
-  --max-width: 760px;
+  --border: #2f2f2f;
+  --max-width: 840px;
 }
 
 :root[data-theme="light"] {
@@ -143,7 +143,7 @@ a:hover {
 
 .profile-text .name {
   font-weight: 600;
-  font-size: 21px;
+  font-size: 19px;
   color: var(--text);
 }
 
@@ -176,14 +176,14 @@ a:hover {
 }
 
 .nav-links a {
-  color: var(--text);
+  color: var(--link);
   text-decoration: underline;
   text-underline-offset: 3px;
   font-size: 15px;
 }
 
 .nav-links a.active {
-  color: var(--link);
+  font-weight: 600;
 }
 
 .icon-links {
