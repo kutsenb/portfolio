@@ -39,7 +39,7 @@
         <div class="nav-links">
           <a href="index.html">home</a>
           <a href="projects.html" class="active">projects</a>
-          <a href="resume.pdf" target="_blank" rel="noopener">cv</a>
+          <a href="Bogdan-Kutsenko-Resume.pdf" target="_blank" rel="noopener">cv</a>
           <a href="posts.html">posts</a>
           <a href="hobbies.html">hobbies</a>
         </div>
@@ -69,6 +69,7 @@
          with whichever ones actually exist, so a project with no
          photos yet simply renders an empty (hidden) row. -->
     <main class="content">
+      <h2 class="section-heading">Projects</h2>
       <p class="page-intro">Engineering builds from coursework and personal work, with notes on what worked and what I'd change.</p>
 
       <div class="entry-block" id="personal-portfolio-website">
@@ -81,20 +82,10 @@
         <h2>Solar Powered Floating Water Quality Monitor</h2>
         <span class="entry-date">Winter 2026</span>
         <p>
-          A floating platform that tracks the sun to power itself, measures
-          the pH and temperature of the water beneath it, and streams
-          readings to a live online dashboard.
-        </p>
-        <ul>
-          <li>Four light sensors guide two servo motors for dual-axis sun tracking</li>
-          <li>PETG platform floats on three hollow 3D-printed buoys, sized using buoyancy and stability calculations</li>
-          <li>Combined platform and riser into one printed part, removing a joint that could fail under wind loads</li>
-          <li>Sealed compartment holds pH and temperature sensors; data sent to the cloud over WiFi</li>
-        </ul>
-        <p class="entry-lesson">
-          <strong>Lesson:</strong> buoys had to be spaced closer than
-          calculated to meet size limits, reducing stability. Keeping heavy
-          components lower and closer to the waterline would have fixed it.
+          A floating platform with dual-axis sun tracking that measures water
+          pH and temperature and streams readings to a live dashboard. Built
+          on three 3D-printed buoys &mdash; learned that keeping heavy parts
+          low and close to the waterline matters more than the math suggests.
         </p>
         <div class="photo-row" data-photos="solar" data-title="Solar Powered Floating Water Quality Monitor"></div>
         <p class="entry-meta">SolidWorks &middot; Arduino MKR 1010 &middot; 3D Printing &middot; IoT</p>
@@ -103,10 +94,11 @@
       <div class="entry-block" id="security-object-tracking">
         <h2>Automated Security and Object Tracking System</h2>
         <span class="entry-date">Winter 2025</span>
-        <ul>
-          <li>LabVIEW control system integrating ultrasonic sensors and DAQ hardware for two-axis object tracking</li>
-          <li>Documented calibration and testing results and prepared improvement notes for future iterations</li>
-        </ul>
+        <p>
+          A LabVIEW control system integrating ultrasonic sensors and DAQ
+          hardware for two-axis object tracking, with documented calibration
+          and testing results.
+        </p>
         <div class="photo-row" data-photos="labview" data-title="Automated Security and Object Tracking System"></div>
         <p class="entry-meta">LabVIEW &middot; DAQ &middot; Sensors</p>
       </div>
@@ -115,21 +107,10 @@
         <h2>Remote Controlled Medical Rover</h2>
         <span class="entry-date">Winter 2025</span>
         <p>
-          A remote-controlled rover that carries medical supplies through
-          hospitals, reducing staff exposure in high-risk areas like
-          isolation units.
-        </p>
-        <ul>
-          <li>3D-printed Ackermann steering driven by a servo for tighter turns with less tire slip</li>
-          <li>Custom PLA gearbox on steel shafts: 8:1 first gear, 4:1 second, and reverse, shifted manually with sliders</li>
-          <li>Every part modelled in SolidWorks; FEA confirmed the gearbox could handle motor torque</li>
-          <li>Front ultrasonic sensor cuts the motor and sounds a buzzer when an obstacle is within 40 cm</li>
-        </ul>
-        <p class="entry-lesson">
-          <strong>Lesson:</strong> under full load the front axle developed
-          negative camber and the servo struggled to steer, showing the
-          steering mounts needed reinforcement. A 12:1 first gear would have
-          cleared the 15&deg; incline.
+          A remote-controlled rover with Ackermann steering and a custom PLA
+          gearbox that carries medical supplies through hospitals, reducing
+          staff exposure in high-risk areas. Found that the steering mounts
+          needed reinforcement under full load.
         </p>
         <div class="photo-row" data-photos="rover" data-title="Remote Controlled Medical Rover"></div>
         <p class="entry-meta">SolidWorks &middot; Arduino &middot; FEA &middot; 3D Printing</p>
@@ -139,10 +120,9 @@
         <h2>Automated Plant Watering System</h2>
         <span class="entry-date">Winter 2024</span>
         <p>
-          A Java program reads a soil moisture sensor and switches a 12 V
-          pump on when the soil is dry and off when it's moist, running
-          multiple wet/dry cycles over several days with live readings on
-          an OLED.
+          A Java program that reads a soil moisture sensor and switches a
+          12 V pump on and off to keep soil moisture in range, with live
+          readings on an OLED.
         </p>
         <div class="photo-row" data-photos="plant" data-title="Automated Plant Watering System"></div>
         <p class="entry-meta">Java &middot; Arduino &middot; Firmata4j &middot; JUnit</p>
