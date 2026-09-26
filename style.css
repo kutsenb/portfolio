@@ -29,7 +29,7 @@
   --bg: #ffffff;
   --text: #24292e;
   --text-muted: #6a737d;
-  --link: #15803d;
+  --link: #126b32;
   --link-visited: #6f42c1;
   --border: #e1e4e8;
 }
@@ -84,6 +84,7 @@ a:hover {
    padding so content never touches the viewport edge on small screens.
    --------------------------------------------------------------------- */
 .page {
+  width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 48px 24px 40px;
@@ -261,6 +262,13 @@ a:hover {
   font-weight: 700;
   color: var(--text-muted);
   margin: 28px 0 6px;
+}
+
+/* Short intro line under a page heading (projects/posts/hobbies), muted
+   like other secondary text but a bit bolder for emphasis. */
+.page-intro {
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .skills-list {
