@@ -141,7 +141,7 @@ a:hover {
 .profile-text .name-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -154,7 +154,7 @@ a:hover {
 /* Plain text, not a link - just a handle shown next to the name */
 .profile-text .handle {
   color: var(--link);
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .tagline {
@@ -253,13 +253,13 @@ a:hover {
 }
 
 .content p {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 
 .section-heading {
   font-size: 13px;
   color: var(--text-muted);
-  margin: 20px 0 8px;
+  margin: 28px 0 10px;
 }
 
 .skills-list {
