@@ -53,8 +53,8 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -116,15 +116,15 @@ a:hover {
    it never looks perfectly still. */
 .avatar-img {
   transform-origin: 50% 85%;
-  animation: avatar-sway 2.4s ease-in-out infinite alternate;
+  animation: avatar-sway 3.2s ease-in-out infinite alternate;
 }
 
 @keyframes avatar-sway {
   from {
-    transform: rotate(-5deg);
+    transform: rotate(-2deg);
   }
   to {
-    transform: rotate(5deg);
+    transform: rotate(3deg);
   }
 }
 
@@ -145,6 +145,12 @@ a:hover {
   font-weight: 600;
   font-size: 21px;
   color: var(--text);
+}
+
+/* Plain text, not a link - just a handle shown next to the name */
+.profile-text .handle {
+  color: var(--link);
+  font-size: 15px;
 }
 
 .tagline {
@@ -284,6 +290,14 @@ a:hover {
   border-bottom: none;
 }
 
+.entry-list a {
+  text-decoration: none;
+}
+
+.entry-list a:hover {
+  text-decoration: underline;
+}
+
 /* Small type label used on the home page's mixed "Latest" list, e.g.
    PROJECT / POST / HOBBY / CERTIFICATE, before the item's title. */
 .entry-tag {
@@ -351,6 +365,12 @@ a:hover {
   display: block;
   text-align: right;
   margin-top: 20px;
+}
+
+/* Extra breathing room above a paragraph that follows an entry-list,
+   e.g. the "Have a look at..." line under the home page's Latest list. */
+.content p.after-list {
+  margin-top: 32px;
 }
 
 /* Shown on pages with no entries yet (e.g. posts before the first one) */
