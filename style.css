@@ -90,7 +90,7 @@ a:hover {
    --------------------------------------------------------------------- */
 .profile {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
 }
 
@@ -145,16 +145,6 @@ a:hover {
   font-weight: 600;
   font-size: 21px;
   color: var(--text);
-}
-
-.profile-text .handle {
-  color: var(--link);
-  text-decoration: none;
-  font-size: 15px;
-}
-
-.profile-text .handle:hover {
-  text-decoration: underline;
 }
 
 .tagline {
@@ -292,6 +282,18 @@ a:hover {
 
 .entry-list li:last-child {
   border-bottom: none;
+}
+
+/* Small type label used on the home page's mixed "Latest" list, e.g.
+   PROJECT / POST / HOBBY / CERTIFICATE, before the item's title. */
+.entry-tag {
+  display: inline-block;
+  min-width: 66px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
 }
 
 .entry-list .entry-date {

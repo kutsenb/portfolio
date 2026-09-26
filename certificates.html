@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bogdan Kutsenko</title>
-  <meta name="description" content="Bogdan Kutsenko - Mechanical Engineering student interested in AI/ML." />
+  <title>Certificates - Bogdan Kutsenko</title>
+  <meta name="description" content="Certificates earned by Bogdan Kutsenko." />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
   <!-- Applying the saved theme before paint avoids a flash of the wrong theme -->
@@ -23,7 +23,6 @@
     <!-- ================= Header: avatar, name, tagline, nav, icons ================= -->
     <header>
       <div class="profile">
-        <!-- Avatar: the sway animation on .avatar-img lives in style.css -->
         <div class="avatar" aria-hidden="true">
           <img src="images/avatar.png" alt="Bogdan Kutsenko" class="avatar-img" />
         </div>
@@ -37,12 +36,12 @@
 
       <nav class="nav-row">
         <div class="nav-links">
-          <a href="index.html" class="active">home</a>
+          <a href="index.html">home</a>
           <a href="projects.html">projects</a>
           <a href="resume.pdf" target="_blank" rel="noopener">cv</a>
           <a href="posts.html">posts/readings</a>
           <a href="hobbies.html">hobbies</a>
-          <a href="certificates.html">certificates</a>
+          <a href="certificates.html" class="active">certificates</a>
         </div>
 
         <div class="icon-links">
@@ -63,47 +62,21 @@
       </nav>
     </header>
 
-    <!-- ================= Main content: intro + skills + latest updates ================= -->
+    <!-- ================= Main content: certificates =================
+         Duplicate an .entry-block for each certificate: a title, the
+         date earned, and the issuing organization as the meta line. -->
     <main class="content">
-      <p>Hi there!</p>
-      <p>
-        I'm a fourth-year Mechanical Engineering student at Lassonde (York
-        University), based in Toronto. I like blending CAD, embedded
-        systems, and code to build things that move.
-      </p>
+      <h2 class="section-heading">Certificates</h2>
 
-      <h2 class="section-heading">Skills</h2>
-      <p class="skills-list">Python, SolidWorks, MATLAB, Arduino</p>
+      <!--
+      <div class="entry-block">
+        <h2>Certificate name</h2>
+        <span class="entry-date">Month YYYY</span>
+        <p class="entry-meta">Issuing organization</p>
+      </div>
+      -->
 
-      <!-- "Latest" is a manually curated feed across projects, posts,
-           hobbies, and certificates &mdash; not an automatic tracker, since
-           this is a static site with no backend. Update this list by hand
-           whenever something new is added on any of those pages. -->
-      <h2 class="section-heading">Latest</h2>
-      <ul class="entry-list">
-        <li>
-          <span><span class="entry-tag">Project</span><a href="projects.html#personal-portfolio-website">Personal Portfolio Website</a></span>
-          <span class="entry-date">Fall 2026</span>
-        </li>
-        <li>
-          <span><span class="entry-tag">Project</span><a href="projects.html#ai-content-lead-tools">AI Content &amp; Lead Tools</a></span>
-          <span class="entry-date">Fall 2026</span>
-        </li>
-        <li>
-          <span><span class="entry-tag">Project</span><a href="projects.html#solar-water-monitor">Solar Powered Floating Water Quality Monitor</a></span>
-          <span class="entry-date">Winter 2026</span>
-        </li>
-        <li>
-          <span><span class="entry-tag">Project</span><a href="projects.html#security-object-tracking">Automated Security and Object Tracking System</a></span>
-          <span class="entry-date">Fall 2025</span>
-        </li>
-      </ul>
-
-      <p>
-        Have a look at my <a href="hobbies.html">hobbies</a>, recent
-        <a href="posts.html">posts/readings</a>, or my
-        <a href="certificates.html">certificates</a>.
-      </p>
+      <p class="empty-state">No certificates yet &mdash; check back soon.</p>
     </main>
 
     <!-- ================= Footer ================= -->
