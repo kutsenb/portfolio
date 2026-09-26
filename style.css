@@ -159,7 +159,7 @@ a:hover {
 
 .tagline {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-top: 2px;
 }
 
@@ -298,18 +298,6 @@ a:hover {
 
 .entry-list a:hover {
   text-decoration: underline;
-}
-
-/* Small type label used on the home page's mixed "Latest" list, e.g.
-   PROJECT / POST / HOBBY / CERTIFICATE, before the item's title. */
-.entry-tag {
-  display: inline-block;
-  min-width: 66px;
-  color: var(--text-muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-right: 4px;
 }
 
 .entry-list .entry-date {
