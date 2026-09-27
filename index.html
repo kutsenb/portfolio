@@ -22,6 +22,14 @@
 
     <!-- ================= Header: avatar, name, tagline, nav, icons ================= -->
     <header>
+      <!-- GitHub contributions graph. Built and animated entirely by
+           script.js (fetches real data, click/Enter plays Conway's Game
+           of Life seeded from it, then settles back to the real graph).
+           Stays hidden if the data can't be loaded. -->
+      <div class="contrib-wrap" id="contrib-wrap" role="button" tabindex="0" aria-label="GitHub contributions. Activate to bring them to life." hidden>
+        <svg class="contrib-graph" id="contrib-graph" aria-hidden="true"></svg>
+      </div>
+
       <div class="profile">
         <!-- Avatar: the sway animation on .avatar-img lives in style.css -->
         <div class="avatar" aria-hidden="true">

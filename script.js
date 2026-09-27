@@ -123,3 +123,262 @@
     rows.forEach(loadPhotoRow);
   });
 })();
+
+// =========================================================================
+// GitHub contributions graph, with a Conway's Game of Life easter egg
+// This is a static site with no backend, so real contribution data is
+// fetched client-side from a well-known CORS-enabled community mirror
+// (github-contributions-api.jogruber.de, the same source used by several
+// open-source "GitHub calendar" widgets) instead of GitHub's own graph
+// endpoint, which blocks cross-origin requests. Results are cached in
+// localStorage for the day so navigating between pages doesn't refetch.
+//
+// Clicking (or pressing Enter/Space on) the graph seeds Conway's Game of
+// Life from that real data and plays it for up to 36 generations, fading
+// each cell between "dead" and "alive" every 160ms, then settles back to
+// the real graph after a short pause. Clicking again mid-run resets it
+// immediately. If the data can't be loaded, the widget just stays hidden.
+// =========================================================================
+
+(function () {
+  var USERNAME = "kutsenb";
+  var API_URL = "https://github-contributions-api.jogruber.de/v4/" + USERNAME + "?y=last";
+  var CACHE_KEY = "contrib-cache-" + USERNAME;
+  var WEEKS = 24;
+  var DAYS = 7;
+  var CELL = 10;
+  var GAP = 2;
+  var PITCH = CELL + GAP;
+  var LEFT_GUTTER = 22;
+  var TOP_GUTTER = 14;
+  var MAX_GENERATIONS = 36;
+  var STEP_MS = 160;
+  var RESET_DELAY_MS = 1500;
+  var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var IDLE_LABEL = "GitHub contributions. Activate to bring them to life.";
+  var PLAYING_LABEL = "Contributions playing Game of Life. Activate to restore.";
+
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function dateKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function readCache() {
+    try {
+      return JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeCache(data) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ date: todayKey(), data: data }));
+    } catch (e) {
+      // Storage is optional (private browsing, quota, etc.) - safe to skip.
+    }
+  }
+
+  function loadContributions() {
+    var cached = readCache();
+    if (cached && cached.date === todayKey() && cached.data) {
+      return Promise.resolve(cached.data);
+    }
+
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function () {
+      controller.abort();
+    }, 8000);
+
+    return fetch(API_URL, { signal: controller.signal })
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad status");
+        return res.json();
+      })
+      .then(function (json) {
+        var data = (json && json.contributions) || [];
+        writeCache(data);
+        return data;
+      })
+      .catch(function () {
+        return (cached && cached.data) || null;
+      })
+      .finally(function () {
+        clearTimeout(timeoutId);
+      });
+  }
+
+  // Standard Conway's Game of Life step on a finite (dead-edge) board.
+  function nextGeneration(cells, width, height) {
+    return cells.map(function (alive, index) {
+      var x = index % width;
+      var y = Math.floor(index / width);
+      var neighbors = 0;
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          var nx = x + dx;
+          var ny = y + dy;
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+          if (cells[ny * width + nx]) neighbors++;
+        }
+      }
+      return neighbors === 3 || Boolean(alive && neighbors === 2);
+    });
+  }
+
+  function buildGrid(contributions) {
+    var byDate = {};
+    contributions.forEach(function (entry) {
+      byDate[entry.date] = entry;
+    });
+
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var weekStart = new Date(today);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    var gridStart = new Date(weekStart);
+    gridStart.setDate(gridStart.getDate() - (WEEKS - 1) * 7);
+
+    var days = [];
+    for (var c = 0; c < WEEKS; c++) {
+      for (var r = 0; r < DAYS; r++) {
+        var d = new Date(gridStart);
+        d.setDate(d.getDate() + c * 7 + r);
+        var key = dateKey(d);
+        var entry = byDate[key];
+        days.push({
+          col: c,
+          row: r,
+          date: d,
+          level: entry ? entry.level : 0,
+        });
+      }
+    }
+    return days;
+  }
+
+  function renderGraph(svg, days) {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var width = LEFT_GUTTER + WEEKS * PITCH;
+    var height = TOP_GUTTER + DAYS * PITCH;
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    var svgNS = svg.namespaceURI;
+    var rects = [];
+    var seed = [];
+    var lastMonth = null;
+
+    days.forEach(function (day) {
+      if (day.row === 0) {
+        var month = day.date.getMonth();
+        if (month !== lastMonth) {
+          lastMonth = month;
+          var label = document.createElementNS(svgNS, "text");
+          label.textContent = MONTH_NAMES[month];
+          label.setAttribute("x", LEFT_GUTTER + day.col * PITCH);
+          label.setAttribute("y", TOP_GUTTER - 4);
+          svg.appendChild(label);
+        }
+      }
+
+      var rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("x", LEFT_GUTTER + day.col * PITCH);
+      rect.setAttribute("y", TOP_GUTTER + day.row * PITCH);
+      rect.setAttribute("width", CELL);
+      rect.setAttribute("height", CELL);
+      rect.setAttribute("rx", 2);
+      rect.setAttribute("data-level", day.level);
+      rect.setAttribute("data-date", dateKey(day.date));
+      svg.appendChild(rect);
+      rects.push(rect);
+      seed.push(day.level > 0);
+    });
+
+    ["Mon", "Wed", "Fri"].forEach(function (name, i) {
+      var row = i * 2 + 1;
+      var label = document.createElementNS(svgNS, "text");
+      label.textContent = name;
+      label.setAttribute("x", 0);
+      label.setAttribute("y", TOP_GUTTER + row * PITCH + CELL * 0.8);
+      svg.appendChild(label);
+    });
+
+    return { rects: rects, seed: seed };
+  }
+
+  function setupGameOfLife(wrap, svg, board) {
+    var generation = 0;
+    var cells = null;
+    var timer = null;
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function reset() {
+      clearTimeout(timer);
+      generation = 0;
+      svg.classList.remove("is-living");
+      wrap.setAttribute("aria-label", IDLE_LABEL);
+      wrap.setAttribute("aria-pressed", "false");
+    }
+
+    function step() {
+      cells = nextGeneration(cells, WEEKS, DAYS);
+      generation++;
+      svg.classList.add("is-living");
+      board.rects.forEach(function (rect, i) {
+        rect.classList.toggle("is-alive", cells[i]);
+      });
+      wrap.setAttribute("aria-label", PLAYING_LABEL);
+      wrap.setAttribute("aria-pressed", "true");
+
+      var done = generation >= MAX_GENERATIONS || reduceMotion.matches;
+      timer = setTimeout(done ? reset : step, done ? RESET_DELAY_MS : STEP_MS);
+    }
+
+    function activate() {
+      if (generation) {
+        reset();
+        return;
+      }
+      cells = board.seed.slice();
+      step();
+    }
+
+    wrap.addEventListener("click", activate);
+    wrap.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      } else if (event.key === "Escape") {
+        reset();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var wrap = document.getElementById("contrib-wrap");
+    var svg = document.getElementById("contrib-graph");
+    if (!wrap || !svg) return;
+
+    loadContributions().then(function (contributions) {
+      if (!contributions) return;
+
+      var days = buildGrid(contributions);
+      var board = renderGraph(svg, days);
+      setupGameOfLife(wrap, svg, board);
+
+      wrap.hidden = false;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          wrap.classList.add("is-ready");
+        });
+      });
+    });
+  });
+})();

@@ -91,6 +91,78 @@ a:hover {
 }
 
 /* ---------------------------------------------------------------------
+   GitHub contributions graph
+   Populated and animated entirely by script.js. Starts hidden (via the
+   [hidden] attribute in HTML) and fades in once real data has loaded,
+   so a slow or failed fetch never leaves an empty box on the page.
+   --------------------------------------------------------------------- */
+.contrib-wrap {
+  max-width: 380px;
+  margin: 0 0 24px;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.4s ease;
+}
+
+.contrib-wrap.is-ready {
+  opacity: 1;
+}
+
+.contrib-wrap:focus-visible {
+  outline: 1px solid var(--text-muted);
+  outline-offset: 4px;
+}
+
+.contrib-graph {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.contrib-graph text {
+  fill: var(--text-muted);
+  font-size: 9px;
+}
+
+/* Default (idle) coloring, keyed off each day's contribution level */
+.contrib-graph rect {
+  fill: var(--border);
+}
+
+.contrib-graph rect[data-level="1"] {
+  fill: color-mix(in srgb, var(--link) 30%, var(--border));
+}
+
+.contrib-graph rect[data-level="2"] {
+  fill: color-mix(in srgb, var(--link) 55%, var(--border));
+}
+
+.contrib-graph rect[data-level="3"] {
+  fill: color-mix(in srgb, var(--link) 80%, var(--border));
+}
+
+.contrib-graph rect[data-level="4"] {
+  fill: var(--link);
+}
+
+/* While playing Game of Life, cells go binary (alive/dead) regardless
+   of their original level, with a short fade between generations. */
+.contrib-graph.is-living rect {
+  fill: var(--border);
+  transition: fill 140ms ease;
+}
+
+.contrib-graph.is-living rect.is-alive {
+  fill: var(--link);
+}
+
+@media (max-width: 480px) {
+  .contrib-wrap {
+    max-width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------
    Header: avatar, name/handle, tagline, nav row, social icons
    --------------------------------------------------------------------- */
 .profile {
