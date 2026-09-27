@@ -198,10 +198,10 @@ a:hover {
 
 @keyframes avatar-sway {
   from {
-    transform: rotate(-2deg);
+    transform: rotate(-3deg);
   }
   to {
-    transform: rotate(3deg);
+    transform: rotate(4deg);
   }
 }
 
