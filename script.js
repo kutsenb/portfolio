@@ -351,6 +351,11 @@
     }
 
     wrap.addEventListener("click", activate);
+    wrap.addEventListener("pointerenter", function (event) {
+      // Only auto-play on a real mouse hover (touch/pen "enter" fires on
+      // tap, which would double up with the click handler above).
+      if (event.pointerType === "mouse" && !generation) activate();
+    });
     wrap.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();

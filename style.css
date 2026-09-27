@@ -98,7 +98,7 @@ a:hover {
    --------------------------------------------------------------------- */
 .contrib-wrap {
   max-width: 380px;
-  margin: 0 0 24px;
+  margin: 0 auto 24px;
   opacity: 0;
   cursor: pointer;
   transition: opacity 0.4s ease;
