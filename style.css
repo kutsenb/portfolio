@@ -87,7 +87,7 @@ a:hover {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 48px 24px 40px;
+  padding: 32px 24px 40px;
 }
 
 /* ---------------------------------------------------------------------
@@ -98,7 +98,7 @@ a:hover {
    --------------------------------------------------------------------- */
 .contrib-wrap {
   max-width: 380px;
-  margin: 0 auto 24px;
+  margin: 0 auto 32px;
   opacity: 0;
   cursor: pointer;
   transition: opacity 0.4s ease;

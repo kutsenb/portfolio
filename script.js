@@ -316,6 +316,7 @@
   function setupGameOfLife(wrap, svg, board) {
     var generation = 0;
     var cells = null;
+    var previousCells = null;
     var timer = null;
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -327,7 +328,15 @@
       wrap.setAttribute("aria-pressed", "false");
     }
 
+    function cellsEqual(a, b) {
+      for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+      }
+      return true;
+    }
+
     function step() {
+      previousCells = cells;
       cells = nextGeneration(cells, WEEKS, DAYS);
       generation++;
       svg.classList.add("is-living");
@@ -337,7 +346,11 @@
       wrap.setAttribute("aria-label", PLAYING_LABEL);
       wrap.setAttribute("aria-pressed", "true");
 
-      var done = generation >= MAX_GENERATIONS || reduceMotion.matches;
+      // Stop early once the board dies out or locks into a static shape,
+      // rather than silently waiting out the rest of the 36-generation
+      // budget on a board that's no longer visibly changing.
+      var settled = cellsEqual(cells, previousCells);
+      var done = generation >= MAX_GENERATIONS || settled || reduceMotion.matches;
       timer = setTimeout(done ? reset : step, done ? RESET_DELAY_MS : STEP_MS);
     }
 
@@ -346,7 +359,15 @@
         reset();
         return;
       }
-      cells = board.seed.slice();
+      // A real contribution history is often too sparse on its own for
+      // Game of Life to do anything interesting - isolated single cells
+      // just die of underpopulation in one step. Real active days are
+      // always included; a light random scatter on top gives the board
+      // enough density to actually ripple for a few seconds before it
+      // settles, while still growing out of your real graph each time.
+      cells = board.seed.map(function (alive) {
+        return alive || Math.random() < 0.13;
+      });
       step();
     }
 
