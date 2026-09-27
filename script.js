@@ -107,7 +107,8 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     var rows = document.querySelectorAll(".photo-row[data-photos]");
-    if (rows.length === 0) return;
+    var mosaicImages = document.querySelectorAll(".mosaic-item img");
+    if (rows.length === 0 && mosaicImages.length === 0) return;
 
     lightbox = document.createElement("div");
     lightbox.className = "lightbox-overlay";
@@ -121,6 +122,12 @@
     });
 
     rows.forEach(loadPhotoRow);
+
+    mosaicImages.forEach(function (img) {
+      img.addEventListener("click", function () {
+        openLightbox(img.src, img.alt);
+      });
+    });
   });
 })();
 
