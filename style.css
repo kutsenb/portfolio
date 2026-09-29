@@ -124,9 +124,13 @@ a:hover {
   font-size: 9px;
 }
 
-/* Default (idle) coloring, keyed off each day's contribution level */
+/* Default (idle) coloring, keyed off each day's contribution level.
+   The same data-level attribute (0-4) drives the rain and message
+   easter-egg animations in script.js, so cells simply fade between
+   these colors instead of needing separate animation-only rules. */
 .contrib-graph rect {
   fill: var(--border);
+  transition: fill 140ms ease;
 }
 
 .contrib-graph rect[data-level="1"] {
@@ -142,17 +146,6 @@ a:hover {
 }
 
 .contrib-graph rect[data-level="4"] {
-  fill: var(--link);
-}
-
-/* While playing Game of Life, cells go binary (alive/dead) regardless
-   of their original level, with a short fade between generations. */
-.contrib-graph.is-living rect {
-  fill: var(--border);
-  transition: fill 140ms ease;
-}
-
-.contrib-graph.is-living rect.is-alive {
   fill: var(--link);
 }
 
@@ -509,7 +502,7 @@ a:hover {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: color-mix(in srgb, var(--border) 35%, transparent);
+  background: var(--bg);
   border-radius: 4px;
   cursor: zoom-in;
   transition: transform 0.25s ease, opacity 0.25s ease;
