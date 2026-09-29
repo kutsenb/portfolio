@@ -141,10 +141,11 @@
 // localStorage for the day so navigating between pages doesn't refetch.
 //
 // Clicking (or hovering, or pressing Enter/Space on) the graph plays a
-// falling-rain animation across the cells, then scrolls a pixel-font
-// message through the same grid for an equal stretch of time, then
-// fades back to the real graph. Clicking again mid-run resets it
-// immediately. If the data can't be loaded, the widget just stays hidden.
+// falling-rain animation that sweeps down and collapses into a pixel-font
+// shape - first "I <3", then "LINDA", then "WANG" - holding each one still
+// for a beat before the rain reforms into the next. Clicking again mid-run
+// resets it immediately. If the data can't be loaded, the widget stays
+// hidden.
 // =========================================================================
 
 (function () {
@@ -158,45 +159,40 @@
   var PITCH = CELL + GAP;
   var LEFT_GUTTER = 22;
   var TOP_GUTTER = 14;
-  var RAIN_STEP_MS = 90;
-  var RAIN_DURATION_MS = 2300;
-  var MESSAGE_STEP_MS = 90;
-  var MESSAGE_DURATION_MS = 2300;
-  var RESET_DELAY_MS = 700;
+  var STEP_MS = 90;
+  var SCATTER_TICKS = 5;
+  var HOLD_MS = 1150;
   var DROP_SPAWN_CHANCE = 0.16;
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var IDLE_LABEL = "GitHub contributions. Activate for a surprise.";
   var PLAYING_LABEL = "Contributions playing an animation. Activate to restore.";
 
-  // ---- Tiny 5x7 pixel font, just enough of it for "I <3 LINDA W" ----
-  var FONT_ROWS = {
-    "I": ["01110", "00100", "00100", "00100", "00100", "00100", "01110"],
-    "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
-    "N": ["10001", "11001", "10101", "10101", "10011", "10001", "10001"],
-    "D": ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
-    "A": ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
-    "W": ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
-    "heart": ["01010", "11111", "11111", "11111", "01110", "00100", "00000"],
+  // ---- Tiny pixel fonts, just enough of them to spell out each held
+  // shape. Two widths: a roomier 5-wide one for short frames ("I <3",
+  // "WANG"), and a condensed 4-wide one for "LINDA" so all five letters
+  // fit across the grid's 24 columns at once with no scrolling. ----
+  var FONT5 = {
+    I: ["01110", "00100", "00100", "00100", "00100", "00100", "01110"],
+    N: ["10001", "11001", "10101", "10101", "10011", "10001", "10001"],
+    A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+    W: ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
+    G: ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
+    heart: ["01010", "11111", "11111", "11111", "01110", "00100", "00000"],
   };
-  var GLYPH_GAP = 1;
-  var WORD_GAP = 2;
-  // Spells "I ♥ LINDA W", one glyph per entry, with the column gap
-  // that follows it (a wider gap between words than between letters).
-  var MESSAGE_GLYPHS = [
-    { glyph: "I", gap: WORD_GAP },
-    { glyph: "heart", gap: WORD_GAP },
-    { glyph: "L", gap: GLYPH_GAP },
-    { glyph: "I", gap: GLYPH_GAP },
-    { glyph: "N", gap: GLYPH_GAP },
-    { glyph: "D", gap: GLYPH_GAP },
-    { glyph: "A", gap: WORD_GAP },
-    { glyph: "W", gap: 0 },
-  ];
+  var FONT4 = {
+    L: ["1000", "1000", "1000", "1000", "1000", "1000", "1111"],
+    I: ["0110", "0110", "0110", "0110", "0110", "0110", "0110"],
+    N: ["1001", "1101", "1101", "1011", "1011", "1001", "1001"],
+    D: ["1110", "1001", "1001", "1001", "1001", "1001", "1110"],
+    A: ["0110", "1001", "1001", "1111", "1001", "1001", "1001"],
+  };
 
-  function buildMessageBitmap() {
+  // Builds one held frame: a WEEKS-long array of DAYS-tall boolean columns,
+  // centered in the grid with any leftover width as blank padding.
+  function buildFrame(entries) {
     var columns = [];
-    MESSAGE_GLYPHS.forEach(function (entry) {
-      var rows = FONT_ROWS[entry.glyph];
+    entries.forEach(function (entry) {
+      var rows = entry.font[entry.glyph];
       var width = rows[0].length;
       for (var col = 0; col < width; col++) {
         var bits = [];
@@ -209,11 +205,36 @@
         columns.push(new Array(DAYS).fill(false));
       }
     });
-    return columns;
+    var pad = Math.max(0, WEEKS - columns.length);
+    var leftPad = Math.floor(pad / 2);
+    var frame = [];
+    for (var i = 0; i < leftPad; i++) frame.push(new Array(DAYS).fill(false));
+    frame = frame.concat(columns);
+    while (frame.length < WEEKS) frame.push(new Array(DAYS).fill(false));
+    return frame.slice(0, WEEKS);
   }
 
-  var MESSAGE_BITMAP = buildMessageBitmap();
-  var MESSAGE_WIDTH = MESSAGE_BITMAP.length;
+  // "I <3", "LINDA", "WANG" - shown one at a time, each fully static
+  // while held (the "space between LINDA and W" is the transition itself).
+  var FRAMES = [
+    buildFrame([
+      { font: FONT5, glyph: "I", gap: 2 },
+      { font: FONT5, glyph: "heart", gap: 0 },
+    ]),
+    buildFrame([
+      { font: FONT4, glyph: "L", gap: 1 },
+      { font: FONT4, glyph: "I", gap: 1 },
+      { font: FONT4, glyph: "N", gap: 1 },
+      { font: FONT4, glyph: "D", gap: 1 },
+      { font: FONT4, glyph: "A", gap: 0 },
+    ]),
+    buildFrame([
+      { font: FONT5, glyph: "W", gap: 1 },
+      { font: FONT5, glyph: "A", gap: 1 },
+      { font: FONT5, glyph: "N", gap: 1 },
+      { font: FONT5, glyph: "G", gap: 0 },
+    ]),
+  ];
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -352,7 +373,8 @@
   }
 
   function setupEasterEgg(wrap, board) {
-    var phase = "idle"; // "idle" | "rain" | "message"
+    var phase = "idle"; // "idle" | "playing"
+    var runId = 0; // bumped on every reset so stale timers become no-ops
     var timer = null;
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -362,20 +384,37 @@
       });
     }
 
+    function flatten(frame) {
+      var levels = new Array(WEEKS * DAYS).fill(0);
+      for (var c = 0; c < WEEKS; c++) {
+        for (var r = 0; r < DAYS; r++) {
+          if (frame[c][r]) levels[c * DAYS + r] = 4;
+        }
+      }
+      return levels;
+    }
+
     function reset() {
       clearTimeout(timer);
+      runId++;
       phase = "idle";
       applyLevels(board.levels);
       wrap.setAttribute("aria-label", IDLE_LABEL);
       wrap.setAttribute("aria-pressed", "false");
     }
 
-    // One column of rain per tick: each column either has an active drop
-    // (a row index that increments every tick) or doesn't; a short fading
-    // tail trails two rows behind the bright drop head.
+    // A short scatter of falling drops (with a fading tail) between shapes,
+    // giving the sense that the rain is regathering to form the next one.
+    // Each column either has an active drop (a row index that increments
+    // every tick) or doesn't; a short fading tail trails the bright head.
     var dropRows = null;
 
-    function tickRain() {
+    function scatterTick(id, ticksLeft, next) {
+      if (id !== runId) return;
+      if (ticksLeft <= 0) {
+        next();
+        return;
+      }
       var levels = new Array(WEEKS * DAYS).fill(0);
       for (var c = 0; c < WEEKS; c++) {
         if (dropRows[c] == null) {
@@ -391,53 +430,66 @@
           [head - 1, 2],
           [head - 2, 1],
         ].forEach(function (pair) {
-          var row = pair[0];
-          var level = pair[1];
-          if (row >= 0 && row < DAYS) levels[c * DAYS + row] = level;
+          if (pair[0] >= 0 && pair[0] < DAYS) levels[c * DAYS + pair[0]] = pair[1];
         });
       }
       applyLevels(levels);
+      timer = setTimeout(function () {
+        scatterTick(id, ticksLeft - 1, next);
+      }, STEP_MS);
     }
 
-    function runRain(startedAt) {
-      tickRain();
-      if (Date.now() - startedAt >= RAIN_DURATION_MS) {
-        runMessage(Date.now());
-      } else {
-        timer = setTimeout(function () {
-          runRain(startedAt);
-        }, RAIN_STEP_MS);
-      }
+    function scatter(id, ticks, next) {
+      dropRows = new Array(WEEKS).fill(null);
+      scatterTick(id, ticks, next);
     }
 
-    // Scrolls the pixel-font message leftward through the grid: at t=0
-    // its first column sits just off the right edge, and by t=duration
-    // its last column has scrolled fully past the left edge.
-    function tickMessage(t) {
-      var leftEdge = WEEKS - t * (WEEKS + MESSAGE_WIDTH);
-      var levels = new Array(WEEKS * DAYS).fill(0);
-      for (var c = 0; c < WEEKS; c++) {
-        var textCol = Math.round(c - leftEdge);
-        if (textCol < 0 || textCol >= MESSAGE_WIDTH) continue;
-        var bits = MESSAGE_BITMAP[textCol];
-        for (var row = 0; row < DAYS; row++) {
-          if (bits[row]) levels[c * DAYS + row] = 4;
+    // Sweeps a bright band down the grid row by row; any cell the band
+    // passes over that belongs to the target shape locks in and stays lit,
+    // everything else goes dark again once the band moves past it. By the
+    // time the band clears the bottom row, only the shape remains.
+    function collapseInto(frame, next) {
+      var id = runId;
+      var target = flatten(frame);
+      var row = 0;
+
+      function tick() {
+        if (id !== runId) return;
+        var levels = new Array(WEEKS * DAYS).fill(0);
+        for (var c = 0; c < WEEKS; c++) {
+          for (var r = 0; r <= row && r < DAYS; r++) {
+            if (frame[c][r]) levels[c * DAYS + r] = 4;
+          }
+          if (row < DAYS) levels[c * DAYS + row] = 4;
+          if (row - 1 >= 0 && levels[c * DAYS + (row - 1)] < 4) {
+            levels[c * DAYS + (row - 1)] = 1;
+          }
+        }
+        applyLevels(levels);
+        row++;
+        if (row <= DAYS) {
+          timer = setTimeout(tick, STEP_MS);
+        } else {
+          applyLevels(target);
+          timer = setTimeout(next, HOLD_MS);
         }
       }
-      applyLevels(levels);
+
+      tick();
     }
 
-    function runMessage(startedAt) {
-      phase = "message";
-      var elapsed = Date.now() - startedAt;
-      tickMessage(Math.min(elapsed / MESSAGE_DURATION_MS, 1));
-      if (elapsed >= MESSAGE_DURATION_MS) {
-        timer = setTimeout(reset, RESET_DELAY_MS);
-      } else {
-        timer = setTimeout(function () {
-          runMessage(startedAt);
-        }, MESSAGE_STEP_MS);
+    function playFrame(index) {
+      var id = runId;
+      if (index >= FRAMES.length) {
+        reset();
+        return;
       }
+      scatter(id, SCATTER_TICKS, function () {
+        if (id !== runId) return;
+        collapseInto(FRAMES[index], function () {
+          playFrame(index + 1);
+        });
+      });
     }
 
     function activate() {
@@ -445,18 +497,26 @@
         reset();
         return;
       }
+      phase = "playing";
       wrap.setAttribute("aria-label", PLAYING_LABEL);
       wrap.setAttribute("aria-pressed", "true");
       if (reduceMotion.matches) {
-        // Skip the animated build-up; just hold the message briefly.
-        phase = "message";
-        tickMessage(0.5);
-        timer = setTimeout(reset, RAIN_DURATION_MS + MESSAGE_DURATION_MS);
+        // Skip the animated build-up; just hold each shape briefly.
+        var id = runId;
+        var i = 0;
+        (function showNext() {
+          if (id !== runId) return;
+          if (i >= FRAMES.length) {
+            reset();
+            return;
+          }
+          applyLevels(flatten(FRAMES[i]));
+          i++;
+          timer = setTimeout(showNext, HOLD_MS);
+        })();
         return;
       }
-      phase = "rain";
-      dropRows = new Array(WEEKS).fill(null);
-      runRain(Date.now());
+      playFrame(0);
     }
 
     wrap.addEventListener("click", activate);
