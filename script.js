@@ -132,7 +132,7 @@
 })();
 
 // =========================================================================
-// GitHub contributions graph, with a little easter egg
+// GitHub contributions graph, with a Conway's Game of Life easter egg
 // This is a static site with no backend, so real contribution data is
 // fetched client-side from a well-known CORS-enabled community mirror
 // (github-contributions-api.jogruber.de, the same source used by several
@@ -140,12 +140,11 @@
 // endpoint, which blocks cross-origin requests. Results are cached in
 // localStorage for the day so navigating between pages doesn't refetch.
 //
-// Clicking (or hovering, or pressing Enter/Space on) the graph plays a
-// falling-rain animation that sweeps down and collapses into a pixel-font
-// shape - first "I <3", then "LINDA", then "WANG" - holding each one still
-// for a beat before the rain reforms into the next. Clicking again mid-run
-// resets it immediately. If the data can't be loaded, the widget stays
-// hidden.
+// Clicking (or pressing Enter/Space on) the graph seeds Conway's Game of
+// Life from that real data and plays it for up to 36 generations, fading
+// each cell between "dead" and "alive" every 160ms, then settles back to
+// the real graph after a short pause. Clicking again mid-run resets it
+// immediately. If the data can't be loaded, the widget just stays hidden.
 // =========================================================================
 
 (function () {
@@ -159,82 +158,12 @@
   var PITCH = CELL + GAP;
   var LEFT_GUTTER = 22;
   var TOP_GUTTER = 14;
-  var STEP_MS = 90;
-  var SCATTER_TICKS = 5;
-  var HOLD_MS = 1150;
-  var DROP_SPAWN_CHANCE = 0.16;
+  var MAX_GENERATIONS = 36;
+  var STEP_MS = 160;
+  var RESET_DELAY_MS = 1500;
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  var IDLE_LABEL = "GitHub contributions. Activate for a surprise.";
-  var PLAYING_LABEL = "Contributions playing an animation. Activate to restore.";
-
-  // ---- Tiny pixel fonts, just enough of them to spell out each held
-  // shape. Two widths: a roomier 5-wide one for short frames ("I <3",
-  // "WANG"), and a condensed 4-wide one for "LINDA" so all five letters
-  // fit across the grid's 24 columns at once with no scrolling. ----
-  var FONT5 = {
-    I: ["01110", "00100", "00100", "00100", "00100", "00100", "01110"],
-    N: ["10001", "11001", "10101", "10101", "10011", "10001", "10001"],
-    A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
-    W: ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
-    G: ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
-    heart: ["01010", "11111", "11111", "11111", "01110", "00100", "00000"],
-  };
-  var FONT4 = {
-    L: ["1000", "1000", "1000", "1000", "1000", "1000", "1111"],
-    I: ["0110", "0110", "0110", "0110", "0110", "0110", "0110"],
-    N: ["1001", "1101", "1101", "1011", "1011", "1001", "1001"],
-    D: ["1110", "1001", "1001", "1001", "1001", "1001", "1110"],
-    A: ["0110", "1001", "1001", "1111", "1001", "1001", "1001"],
-  };
-
-  // Builds one held frame: a WEEKS-long array of DAYS-tall boolean columns,
-  // centered in the grid with any leftover width as blank padding.
-  function buildFrame(entries) {
-    var columns = [];
-    entries.forEach(function (entry) {
-      var rows = entry.font[entry.glyph];
-      var width = rows[0].length;
-      for (var col = 0; col < width; col++) {
-        var bits = [];
-        for (var row = 0; row < DAYS; row++) {
-          bits.push(rows[row][col] === "1");
-        }
-        columns.push(bits);
-      }
-      for (var g = 0; g < entry.gap; g++) {
-        columns.push(new Array(DAYS).fill(false));
-      }
-    });
-    var pad = Math.max(0, WEEKS - columns.length);
-    var leftPad = Math.floor(pad / 2);
-    var frame = [];
-    for (var i = 0; i < leftPad; i++) frame.push(new Array(DAYS).fill(false));
-    frame = frame.concat(columns);
-    while (frame.length < WEEKS) frame.push(new Array(DAYS).fill(false));
-    return frame.slice(0, WEEKS);
-  }
-
-  // "I <3", "LINDA", "WANG" - shown one at a time, each fully static
-  // while held (the "space between LINDA and W" is the transition itself).
-  var FRAMES = [
-    buildFrame([
-      { font: FONT5, glyph: "I", gap: 2 },
-      { font: FONT5, glyph: "heart", gap: 0 },
-    ]),
-    buildFrame([
-      { font: FONT4, glyph: "L", gap: 1 },
-      { font: FONT4, glyph: "I", gap: 1 },
-      { font: FONT4, glyph: "N", gap: 1 },
-      { font: FONT4, glyph: "D", gap: 1 },
-      { font: FONT4, glyph: "A", gap: 0 },
-    ]),
-    buildFrame([
-      { font: FONT5, glyph: "W", gap: 1 },
-      { font: FONT5, glyph: "A", gap: 1 },
-      { font: FONT5, glyph: "N", gap: 1 },
-      { font: FONT5, glyph: "G", gap: 0 },
-    ]),
-  ];
+  var IDLE_LABEL = "GitHub contributions. Activate to bring them to life.";
+  var PLAYING_LABEL = "Contributions playing Game of Life. Activate to restore.";
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -289,6 +218,25 @@
       });
   }
 
+  // Standard Conway's Game of Life step on a finite (dead-edge) board.
+  function nextGeneration(cells, width, height) {
+    return cells.map(function (alive, index) {
+      var x = index % width;
+      var y = Math.floor(index / width);
+      var neighbors = 0;
+      for (var dy = -1; dy <= 1; dy++) {
+        for (var dx = -1; dx <= 1; dx++) {
+          if (!dx && !dy) continue;
+          var nx = x + dx;
+          var ny = y + dy;
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+          if (cells[ny * width + nx]) neighbors++;
+        }
+      }
+      return neighbors === 3 || Boolean(alive && neighbors === 2);
+    });
+  }
+
   function buildGrid(contributions) {
     var byDate = {};
     contributions.forEach(function (entry) {
@@ -331,7 +279,7 @@
 
     var svgNS = svg.namespaceURI;
     var rects = [];
-    var levels = [];
+    var seed = [];
     var lastMonth = null;
 
     days.forEach(function (day) {
@@ -357,7 +305,7 @@
       rect.setAttribute("data-date", dateKey(day.date));
       svg.appendChild(rect);
       rects.push(rect);
-      levels.push(day.level);
+      seed.push(day.level > 0);
     });
 
     ["Mon", "Wed", "Fri"].forEach(function (name, i) {
@@ -369,161 +317,72 @@
       svg.appendChild(label);
     });
 
-    return { rects: rects, levels: levels };
+    return { rects: rects, seed: seed };
   }
 
-  function setupEasterEgg(wrap, board) {
-    var phase = "idle"; // "idle" | "playing"
-    var runId = 0; // bumped on every reset so stale timers become no-ops
+  function setupGameOfLife(wrap, svg, board) {
+    var generation = 0;
+    var cells = null;
+    var previousCells = null;
     var timer = null;
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    function applyLevels(levels) {
-      board.rects.forEach(function (rect, i) {
-        rect.setAttribute("data-level", levels[i]);
-      });
-    }
-
-    function flatten(frame) {
-      var levels = new Array(WEEKS * DAYS).fill(0);
-      for (var c = 0; c < WEEKS; c++) {
-        for (var r = 0; r < DAYS; r++) {
-          if (frame[c][r]) levels[c * DAYS + r] = 4;
-        }
-      }
-      return levels;
-    }
-
     function reset() {
       clearTimeout(timer);
-      runId++;
-      phase = "idle";
-      applyLevels(board.levels);
+      generation = 0;
+      svg.classList.remove("is-living");
       wrap.setAttribute("aria-label", IDLE_LABEL);
       wrap.setAttribute("aria-pressed", "false");
     }
 
-    // A short scatter of falling drops (with a fading tail) between shapes,
-    // giving the sense that the rain is regathering to form the next one.
-    // Each column either has an active drop (a row index that increments
-    // every tick) or doesn't; a short fading tail trails the bright head.
-    var dropRows = null;
-
-    function scatterTick(id, ticksLeft, next) {
-      if (id !== runId) return;
-      if (ticksLeft <= 0) {
-        next();
-        return;
+    function cellsEqual(a, b) {
+      for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
       }
-      var levels = new Array(WEEKS * DAYS).fill(0);
-      for (var c = 0; c < WEEKS; c++) {
-        if (dropRows[c] == null) {
-          if (Math.random() < DROP_SPAWN_CHANCE) dropRows[c] = 0;
-        } else {
-          dropRows[c] += 1;
-          if (dropRows[c] - 2 >= DAYS) dropRows[c] = null;
-        }
-        var head = dropRows[c];
-        if (head == null) continue;
-        [
-          [head, 4],
-          [head - 1, 2],
-          [head - 2, 1],
-        ].forEach(function (pair) {
-          if (pair[0] >= 0 && pair[0] < DAYS) levels[c * DAYS + pair[0]] = pair[1];
-        });
-      }
-      applyLevels(levels);
-      timer = setTimeout(function () {
-        scatterTick(id, ticksLeft - 1, next);
-      }, STEP_MS);
+      return true;
     }
 
-    function scatter(id, ticks, next) {
-      dropRows = new Array(WEEKS).fill(null);
-      scatterTick(id, ticks, next);
-    }
-
-    // Sweeps a bright band down the grid row by row; any cell the band
-    // passes over that belongs to the target shape locks in and stays lit,
-    // everything else goes dark again once the band moves past it. By the
-    // time the band clears the bottom row, only the shape remains.
-    function collapseInto(frame, next) {
-      var id = runId;
-      var target = flatten(frame);
-      var row = 0;
-
-      function tick() {
-        if (id !== runId) return;
-        var levels = new Array(WEEKS * DAYS).fill(0);
-        for (var c = 0; c < WEEKS; c++) {
-          for (var r = 0; r <= row && r < DAYS; r++) {
-            if (frame[c][r]) levels[c * DAYS + r] = 4;
-          }
-          if (row < DAYS) levels[c * DAYS + row] = 4;
-          if (row - 1 >= 0 && levels[c * DAYS + (row - 1)] < 4) {
-            levels[c * DAYS + (row - 1)] = 1;
-          }
-        }
-        applyLevels(levels);
-        row++;
-        if (row <= DAYS) {
-          timer = setTimeout(tick, STEP_MS);
-        } else {
-          applyLevels(target);
-          timer = setTimeout(next, HOLD_MS);
-        }
-      }
-
-      tick();
-    }
-
-    function playFrame(index) {
-      var id = runId;
-      if (index >= FRAMES.length) {
-        reset();
-        return;
-      }
-      scatter(id, SCATTER_TICKS, function () {
-        if (id !== runId) return;
-        collapseInto(FRAMES[index], function () {
-          playFrame(index + 1);
-        });
+    function step() {
+      previousCells = cells;
+      cells = nextGeneration(cells, WEEKS, DAYS);
+      generation++;
+      svg.classList.add("is-living");
+      board.rects.forEach(function (rect, i) {
+        rect.classList.toggle("is-alive", cells[i]);
       });
+      wrap.setAttribute("aria-label", PLAYING_LABEL);
+      wrap.setAttribute("aria-pressed", "true");
+
+      // Stop early once the board dies out or locks into a static shape,
+      // rather than silently waiting out the rest of the 36-generation
+      // budget on a board that's no longer visibly changing.
+      var settled = cellsEqual(cells, previousCells);
+      var done = generation >= MAX_GENERATIONS || settled || reduceMotion.matches;
+      timer = setTimeout(done ? reset : step, done ? RESET_DELAY_MS : STEP_MS);
     }
 
     function activate() {
-      if (phase !== "idle") {
+      if (generation) {
         reset();
         return;
       }
-      phase = "playing";
-      wrap.setAttribute("aria-label", PLAYING_LABEL);
-      wrap.setAttribute("aria-pressed", "true");
-      if (reduceMotion.matches) {
-        // Skip the animated build-up; just hold each shape briefly.
-        var id = runId;
-        var i = 0;
-        (function showNext() {
-          if (id !== runId) return;
-          if (i >= FRAMES.length) {
-            reset();
-            return;
-          }
-          applyLevels(flatten(FRAMES[i]));
-          i++;
-          timer = setTimeout(showNext, HOLD_MS);
-        })();
-        return;
-      }
-      playFrame(0);
+      // A real contribution history is often too sparse on its own for
+      // Game of Life to do anything interesting - isolated single cells
+      // just die of underpopulation in one step. Real active days are
+      // always included; a light random scatter on top gives the board
+      // enough density to actually ripple for a few seconds before it
+      // settles, while still growing out of your real graph each time.
+      cells = board.seed.map(function (alive) {
+        return alive || Math.random() < 0.13;
+      });
+      step();
     }
 
     wrap.addEventListener("click", activate);
     wrap.addEventListener("pointerenter", function (event) {
       // Only auto-play on a real mouse hover (touch/pen "enter" fires on
       // tap, which would double up with the click handler above).
-      if (event.pointerType === "mouse" && phase === "idle") activate();
+      if (event.pointerType === "mouse" && !generation) activate();
     });
     wrap.addEventListener("keydown", function (event) {
       if (event.key === "Enter" || event.key === " ") {
@@ -545,7 +404,7 @@
 
       var days = buildGrid(contributions);
       var board = renderGraph(svg, days);
-      setupEasterEgg(wrap, board);
+      setupGameOfLife(wrap, svg, board);
 
       wrap.hidden = false;
       requestAnimationFrame(function () {
