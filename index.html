@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bogdan Kutsenko</title>
-  <meta name="description" content="Bogdan Kutsenko - Mechanical Engineering student interested in AI/ML." />
+  <title data-i18n="meta.title.home">Bogdan Kutsenko</title>
+  <meta name="description" content="Bogdan Kutsenko - Mechanical Engineering student interested in AI/ML." data-i18n-attr="content:meta.desc.home" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
   <!-- Applying the saved theme before paint avoids a flash of the wrong theme -->
@@ -33,24 +33,24 @@
       <div class="profile">
         <!-- Avatar: the sway animation on .avatar-img lives in style.css -->
         <div class="avatar" aria-hidden="true">
-          <img src="images/avatar.png" alt="Bogdan Kutsenko" class="avatar-img" />
+          <img src="images/avatar.png" alt="Bogdan Kutsenko" class="avatar-img" data-i18n-attr="alt:profile.avatarAlt" />
         </div>
         <div class="profile-text">
           <div class="name-row">
-            <span class="name">Kutsenko Bogdan</span>
+            <span class="name" data-i18n="profile.name">Kutsenko Bogdan</span>
             <span class="handle">@kutsenb</span>
           </div>
-          <p class="tagline">Mechanical engineering student with a growing curiosity for AI and robotics.</p>
+          <p class="tagline" data-i18n="profile.tagline">Mechanical engineering student with a growing curiosity for AI and robotics.</p>
         </div>
       </div>
 
       <nav class="nav-row">
         <div class="nav-links">
-          <a href="index.html" class="active">home</a>
-          <a href="projects.html">projects</a>
-          <a href="Bogdan-Kutsenko-Resume.pdf" target="_blank" rel="noopener">cv</a>
-          <a href="posts.html">posts</a>
-          <a href="hobbies.html">hobbies</a>
+          <a href="index.html" class="active" data-i18n="nav.home">home</a>
+          <a href="projects.html" data-i18n="nav.projects">projects</a>
+          <a href="Bogdan-Kutsenko-Resume.pdf" target="_blank" rel="noopener" data-i18n="nav.cv">cv</a>
+          <a href="posts.html" data-i18n="nav.posts">posts</a>
+          <a href="hobbies.html" data-i18n="nav.hobbies">hobbies</a>
         </div>
 
         <div class="icon-links">
@@ -60,10 +60,11 @@
           <a href="https://www.linkedin.com/in/bogdankutsenko/" target="_blank" rel="noopener" aria-label="LinkedIn">
             <svg class="icon-fill" viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.11 1 2.48 1 4.98 2.12 4.98 3.5ZM.4 8.13h4.16V23H.4V8.13ZM8.34 8.13h3.99v2.03h.06c.56-1.05 1.92-2.16 3.95-2.16 4.22 0 5 2.78 5 6.39V23h-4.16v-6.73c0-1.6-.03-3.66-2.23-3.66-2.24 0-2.58 1.75-2.58 3.55V23H8.34V8.13Z"/></svg>
           </a>
-          <a href="mailto:kutsenb159@gmail.com" aria-label="Email">
+          <a href="mailto:kutsenb159@gmail.com" aria-label="Email" data-i18n-attr="aria-label:aria.email">
             <svg class="icon-fill" viewBox="0 0 24 24"><path d="M2 4h20a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm1.4 2 8.6 6.45L20.6 6H3.4ZM3 8.09V18h18V8.09l-9 6.75-9-6.75Z"/></svg>
           </a>
-          <button id="theme-toggle" type="button" aria-label="Toggle light and dark theme">
+          <button id="lang-toggle" type="button" aria-label="Switch language to Russian" title="Switch language to Russian"><span class="lang-code">RU</span></button>
+          <button id="theme-toggle" type="button" aria-label="Toggle light and dark theme" data-i18n-attr="aria-label:aria.theme">
             <svg class="icon-stroke icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             <svg class="icon-stroke icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
           </button>
@@ -73,39 +74,39 @@
 
     <!-- ================= Main content: intro + skills + latest updates ================= -->
     <main class="content">
-      <p>Hi there!</p>
-      <p>
+      <p data-i18n="home.hi">Hi there!</p>
+      <p data-i18n="home.intro">
         I'm a fourth-year Mechanical Engineering student at Lassonde (York
         University), based in Toronto. I like blending CAD, embedded
         systems, and code to build things that move.
       </p>
-      <p>Currently learning software and machine learning to pair with a mechanical background.</p>
+      <p data-i18n="home.learning">Currently learning software and machine learning to pair with a mechanical background.</p>
 
       <!-- "latest:" is a manually curated feed across projects, posts,
            hobbies, and certificates &mdash; not an automatic tracker, since
            this is a static site with no backend. Update this list by hand
            whenever something new is added on any of those pages. -->
-      <h2 class="section-heading">Latest:</h2>
+      <h2 class="section-heading" data-i18n="home.latest">Latest:</h2>
       <ul class="entry-list">
         <li>
-          <a href="projects.html#personal-portfolio-website">Personal Portfolio Website</a>
-          <span class="entry-date">Fall 2026</span>
+          <a href="projects.html#personal-portfolio-website" data-i18n="proj.portfolio.title">Personal Portfolio Website</a>
+          <span class="entry-date" data-i18n="date.fall2026">Fall 2026</span>
         </li>
         <li>
-          <a href="projects.html#solar-water-monitor">Solar Powered Floating Water Quality Monitor</a>
-          <span class="entry-date">Winter 2026</span>
+          <a href="projects.html#solar-water-monitor" data-i18n="proj.solar.title">Solar Powered Floating Water Quality Monitor</a>
+          <span class="entry-date" data-i18n="date.winter2026">Winter 2026</span>
         </li>
         <li>
-          <a href="projects.html#security-object-tracking">Automated Security and Object Tracking System</a>
-          <span class="entry-date">Winter 2025</span>
+          <a href="projects.html#security-object-tracking" data-i18n="proj.security.title">Automated Security and Object Tracking System</a>
+          <span class="entry-date" data-i18n="date.winter2025">Winter 2025</span>
         </li>
         <li>
-          <a href="projects.html#medical-rover">Remote Controlled Medical Rover</a>
-          <span class="entry-date">Winter 2025</span>
+          <a href="projects.html#medical-rover" data-i18n="proj.rover.homeTitle">Remote Controlled Medical Rover</a>
+          <span class="entry-date" data-i18n="date.winter2025">Winter 2025</span>
         </li>
       </ul>
 
-      <p class="after-list">
+      <p class="after-list" data-i18n-html="home.more">
         Have a look at my <a href="hobbies.html">hobbies</a>, recent
         <a href="posts.html">posts</a>, or my
         <a href="certificates.html">certificates</a>.
@@ -114,7 +115,7 @@
 
     <!-- ================= Footer ================= -->
     <footer class="site-footer">
-      <p>&copy; 2026 Kutsenko Bogdan</p>
+      <p data-i18n="footer.copy">&copy; 2026 Kutsenko Bogdan</p>
     </footer>
 
   </div>

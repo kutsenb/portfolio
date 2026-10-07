@@ -304,6 +304,16 @@ a:hover {
   stroke-linejoin: round;
 }
 
+/* Language switch: shows the code of the language it will switch to */
+#lang-toggle {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  height: 16px;
+}
+
 /* Show only one of the sun/moon icons at a time, based on theme */
 #theme-toggle .icon-moon {
   display: block;
