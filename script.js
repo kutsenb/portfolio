@@ -42,208 +42,6 @@
 })();
 
 // =========================================================================
-// Language switch (English / Russian)
-// English is the page's own markup, so the site reads normally without
-// JavaScript. Elements opted in for translation carry one of:
-//   data-i18n="key"            replace the element's text
-//   data-i18n-html="key"       replace its inner HTML (text with links)
-//   data-i18n-attr="a:key;..." replace the named attributes
-// The Russian text for each key lives in RU below; the original English is
-// remembered per element the first time it is touched, so switching back
-// restores it exactly. The choice is saved in localStorage and announced to
-// the other modules via a "sitelanguagechange" event; script-generated text
-// (graph labels, photo captions) reads from UI instead.
-// =========================================================================
-
-(function () {
-  var STORAGE_KEY = "lang";
-  var root = document.documentElement;
-  var originals = new WeakMap();
-  var current = "en";
-
-  var RU = {
-    "meta.title.home": "Богдан Куценко",
-    "meta.desc.home": "Богдан Куценко — студент-механик, интересующийся ИИ и машинным обучением.",
-    "meta.title.projects": "Проекты — Богдан Куценко",
-    "meta.desc.projects": "Инженерные и программные проекты Богдана Куценко.",
-    "meta.title.posts": "Заметки — Богдан Куценко",
-    "meta.desc.posts": "Заметки и конспекты прочитанного Богдана Куценко.",
-    "meta.title.hobbies": "Хобби — Богдан Куценко",
-    "meta.desc.hobbies": "Хобби и увлечения Богдана Куценко.",
-    "meta.title.certificates": "Сертификаты — Богдан Куценко",
-    "meta.desc.certificates": "Сертификаты, полученные Богданом Куценко.",
-
-    "profile.avatarAlt": "Богдан Куценко",
-    "profile.name": "Куценко Богдан",
-    "profile.tagline": "Студент-механик с растущим интересом к ИИ и робототехнике.",
-    "nav.home": "главная",
-    "nav.projects": "проекты",
-    "nav.cv": "резюме",
-    "nav.posts": "заметки",
-    "nav.hobbies": "хобби",
-    "aria.email": "Электронная почта",
-    "aria.theme": "Переключить светлую и тёмную тему",
-    "footer.copy": "© 2026 Куценко Богдан",
-
-    "date.fall2026": "Осень 2026",
-    "date.winter2026": "Зима 2026",
-    "date.winter2025": "Зима 2025",
-    "date.winter2024": "Зима 2024",
-    "date.aug2026": "Авг. 2026",
-    "date.jan2026": "Янв. 2026",
-
-    "home.hi": "Привет!",
-    "home.intro": "Я студент четвёртого курса по специальности «Машиностроение» в Lassonde (Йоркский университет), живу в Торонто. Мне нравится сочетать CAD-проектирование, встраиваемые системы и программирование, чтобы создавать устройства, которые двигаются.",
-    "home.learning": "Сейчас изучаю разработку программного обеспечения и машинное обучение, чтобы дополнить ими механическую подготовку.",
-    "home.latest": "Последнее:",
-    "home.more": "Загляните в мои <a href=\"hobbies.html\">хобби</a>, свежие <a href=\"posts.html\">заметки</a> или <a href=\"certificates.html\">сертификаты</a>.",
-
-    "projects.heading": "Проекты",
-    "projects.intro": "Учебные и личные инженерные проекты",
-    "proj.portfolio.title": "Персональный сайт-портфолио",
-    "proj.portfolio.desc": "Разработал и запустил адаптивный персональный сайт на собственном домене.",
-    "proj.solar.title": "Плавучий монитор качества воды на солнечной энергии",
-    "proj.solar.desc": "Плавучая платформа с двухосевым слежением за солнцем, которая измеряет pH и температуру воды и передаёт показания на панель мониторинга в реальном времени. Конструкция построена на трёх буях, напечатанных на 3D-принтере. Опыт показал: размещение тяжёлых деталей низко и ближе к ватерлинии важнее, чем подсказывают расчёты.",
-    "proj.solar.meta": "SolidWorks · Arduino MKR 1010 · 3D-печать · IoT",
-    "proj.security.title": "Автоматизированная система охраны и отслеживания объектов",
-    "proj.security.desc": "Система управления на LabVIEW, объединяющая ультразвуковые датчики и оборудование DAQ для двухосевого отслеживания объектов, с задокументированными результатами калибровки и испытаний.",
-    "proj.security.meta": "LabVIEW · DAQ · Датчики",
-    "proj.rover.title": "Дистанционно управляемый ровер",
-    "proj.rover.homeTitle": "Дистанционно управляемый медицинский ровер",
-    "proj.rover.desc": "Дистанционно управляемый ровер с рулевым управлением по схеме Аккермана и редуктором собственной конструкции из PLA, который перевозит медицинские материалы по больницам и снижает контакт персонала с зонами повышенного риска. Выяснилось, что крепления рулевого механизма необходимо усилить для работы при полной нагрузке.",
-    "proj.rover.meta": "SolidWorks · Arduino · МКЭ-анализ · 3D-печать",
-    "proj.plant.title": "Автоматизированная система полива растений",
-    "proj.plant.desc": "Программа на Java, которая считывает показания датчика влажности почвы и включает и выключает насос на 12 В, поддерживая влажность почвы в заданном диапазоне; текущие показания выводятся на OLED-дисплей.",
-
-    "posts.heading": "Заметки",
-    "posts.intro": "Время от времени пишу о том, что изучаю.",
-
-    "hobbies.heading": "Хобби",
-    "hobbies.intro": "В основном поездки, а также другие увлечения.",
-    "hobbies.mw.title": "Гора Вашингтон",
-    "hobbies.mw.alt1": "Туристы поднимаются по каменной осыпи недалеко от вершины горы Вашингтон; позади долину заполняют облака",
-    "hobbies.mw.alt2": "Памятная табличка на вершине горы Вашингтон о рекордной скорости ветра — 231 миля в час (около 372 км/ч)",
-    "hobbies.mw.alt3": "Вид на гору Вашингтон с полосой облаков на вершине, с парковки у её подножия",
-    "hobbies.mw.alt4": "Скалистый, поросший деревьями хребет горы Вашингтон под пасмурным небом",
-    "hobbies.mw.alt5": "Зубчатый скалистый хребет горы Вашингтон за хвойными деревьями",
-    "hobbies.mw.alt6": "Водопад, стекающий по крутому скалистому склону горы Вашингтон, частично скрытый туманом",
-    "hobbies.mw.alt7": "Домик метеостанции с радиомачтой на тропе к вершине горы Вашингтон среди деревьев",
-    "hobbies.mw.alt8": "Скалистый альпийский хребет у вершины горы Вашингтон, частично окутанный низкими облаками",
-
-    "certs.heading": "Сертификаты",
-    "certs.whmis.desc": "Сертификат по основам безопасности и работе с опасными материалами.",
-    "certs.whmis.meta": "Йоркский университет &middot; ID сертификата 8522131065BK &middot; <a href=\"whmis-2-certificate.pdf\" target=\"_blank\" rel=\"noopener\">Посмотреть сертификат</a>"
-  };
-
-  // Text that script.js itself puts on the page, in both languages.
-  var UI = {
-    en: {
-      "lang.code": "RU",
-      "lang.label": "Switch language to Russian",
-      "photo.word": "photo",
-      "graph.months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      "graph.weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-      "graph.idle": "GitHub contributions. Activate to bring them to life.",
-      "graph.playing": "Contributions playing Game of Life. Activate to restore."
-    },
-    ru: {
-      "lang.code": "EN",
-      "lang.label": "Переключить на английский язык",
-      "photo.word": "фото",
-      "graph.months": ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
-      "graph.weekdays": ["вс", "пн", "вт", "ср", "чт", "пт", "сб"],
-      "graph.idle": "Активность на GitHub. Нажмите, чтобы оживить её.",
-      "graph.playing": "Активность на GitHub воспроизводит игру «Жизнь». Нажмите, чтобы вернуть обычный вид."
-    }
-  };
-
-  function readStored() {
-    try {
-      var stored = localStorage.getItem(STORAGE_KEY);
-      return stored === "ru" || stored === "en" ? stored : "en";
-    } catch (e) {
-      return "en";
-    }
-  }
-
-  function writeStored(lang) {
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch (e) {
-      // Storage is optional (private browsing, quota, etc.) - safe to skip.
-    }
-  }
-
-  function record(el) {
-    var rec = originals.get(el);
-    if (!rec) {
-      rec = { text: el.textContent, html: el.innerHTML, attrs: {} };
-      originals.set(el, rec);
-    }
-    return rec;
-  }
-
-  function translate(lang) {
-    document.querySelectorAll("[data-i18n]").forEach(function (el) {
-      var rec = record(el);
-      var ru = RU[el.getAttribute("data-i18n")];
-      el.textContent = lang === "ru" && ru != null ? ru : rec.text;
-    });
-    document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
-      var rec = record(el);
-      var ru = RU[el.getAttribute("data-i18n-html")];
-      el.innerHTML = lang === "ru" && ru != null ? ru : rec.html;
-    });
-    document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
-      var rec = record(el);
-      el.getAttribute("data-i18n-attr").split(";").forEach(function (pair) {
-        var colon = pair.indexOf(":");
-        var name = pair.slice(0, colon).trim();
-        var ru = RU[pair.slice(colon + 1).trim()];
-        if (!(name in rec.attrs)) rec.attrs[name] = el.getAttribute(name);
-        el.setAttribute(name, lang === "ru" && ru != null ? ru : rec.attrs[name]);
-      });
-    });
-  }
-
-  function setLanguage(lang, persist) {
-    current = lang;
-    root.setAttribute("lang", lang);
-    translate(lang);
-
-    var button = document.getElementById("lang-toggle");
-    if (button) {
-      button.querySelector(".lang-code").textContent = UI[lang]["lang.code"];
-      button.setAttribute("aria-label", UI[lang]["lang.label"]);
-      button.setAttribute("title", UI[lang]["lang.label"]);
-    }
-
-    if (persist) writeStored(lang);
-    document.dispatchEvent(new CustomEvent("sitelanguagechange", { detail: { lang: lang } }));
-  }
-
-  window.siteI18n = {
-    lang: function () {
-      return current;
-    },
-    ui: function (key) {
-      return UI[current][key];
-    }
-  };
-
-  // This script sits at the end of <body>, so every element it needs
-  // already exists and the page can be translated before first paint.
-  setLanguage(readStored(), false);
-
-  var toggle = document.getElementById("lang-toggle");
-  if (toggle) {
-    toggle.addEventListener("click", function () {
-      setLanguage(current === "en" ? "ru" : "en", true);
-    });
-  }
-})();
-
-// =========================================================================
 // Project photo thumbnails + lightbox
 // Each .photo-row on the page names an image prefix (e.g. "solar"). Since
 // this is a static site with no server-side directory listing, we just
@@ -256,32 +54,14 @@
 (function () {
   var MAX_PHOTOS_PER_PROJECT = 10;
 
-  // Caption for a project photo. In Russian the project's (translated)
-  // heading is used instead of the English data-title.
-  function photoAlt(row, index) {
-    var title = row.getAttribute("data-title") || "";
-    if (window.siteI18n.lang() !== "en") {
-      var heading = row.parentElement && row.parentElement.querySelector("h2");
-      if (heading) title = heading.textContent.trim();
-    }
-    return title + " — " + window.siteI18n.ui("photo.word") + " " + index;
-  }
-
-  document.addEventListener("sitelanguagechange", function () {
-    document.querySelectorAll(".photo-row img").forEach(function (img) {
-      img.alt = photoAlt(img.parentElement, img.getAttribute("data-photo-index"));
-    });
-  });
-
-  function tryLoadPhoto(row, prefix, index) {
+  function tryLoadPhoto(row, prefix, title, index) {
     return new Promise(function (resolve) {
       var src = "images/" + prefix + "-" + index + ".jpg";
       var probe = new Image();
       probe.onload = function () {
         var thumb = document.createElement("img");
         thumb.src = src;
-        thumb.setAttribute("data-photo-index", index);
-        thumb.alt = photoAlt(row, index);
+        thumb.alt = title + " — photo " + index;
         thumb.addEventListener("click", function () {
           openLightbox(src, thumb.alt);
         });
@@ -296,11 +76,12 @@
 
   function loadPhotoRow(row) {
     var prefix = row.getAttribute("data-photos");
+    var title = row.getAttribute("data-title") || "";
     if (!prefix) return;
 
     var attempts = [];
     for (var i = 1; i <= MAX_PHOTOS_PER_PROJECT; i++) {
-      attempts.push(tryLoadPhoto(row, prefix, i));
+      attempts.push(tryLoadPhoto(row, prefix, title, i));
     }
 
     Promise.all(attempts).then(function (thumbs) {
@@ -380,27 +161,9 @@
   var MAX_GENERATIONS = 36;
   var STEP_MS = 160;
   var RESET_DELAY_MS = 1500;
-  var i18n = window.siteI18n;
-
-  function idleLabel() {
-    return i18n.ui("graph.idle");
-  }
-
-  function playingLabel() {
-    return i18n.ui("graph.playing");
-  }
-
-  // Month and weekday labels are SVG text; refreshed when the language flips.
-  function refreshGraphLabels(svg) {
-    var months = i18n.ui("graph.months");
-    var weekdays = i18n.ui("graph.weekdays");
-    svg.querySelectorAll("text[data-month]").forEach(function (label) {
-      label.textContent = months[label.getAttribute("data-month")];
-    });
-    svg.querySelectorAll("text[data-weekday]").forEach(function (label) {
-      label.textContent = weekdays[label.getAttribute("data-weekday")];
-    });
-  }
+  var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var IDLE_LABEL = "GitHub contributions. Activate to bring them to life.";
+  var PLAYING_LABEL = "Contributions playing Game of Life. Activate to restore.";
 
   function todayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -525,8 +288,7 @@
         if (month !== lastMonth) {
           lastMonth = month;
           var label = document.createElementNS(svgNS, "text");
-          label.setAttribute("data-month", month);
-          label.textContent = i18n.ui("graph.months")[month];
+          label.textContent = MONTH_NAMES[month];
           label.setAttribute("x", LEFT_GUTTER + day.col * PITCH);
           label.setAttribute("y", TOP_GUTTER - 4);
           svg.appendChild(label);
@@ -546,10 +308,10 @@
       seed.push(day.level > 0);
     });
 
-    [1, 3, 5].forEach(function (row) {
+    ["Mon", "Wed", "Fri"].forEach(function (name, i) {
+      var row = i * 2 + 1;
       var label = document.createElementNS(svgNS, "text");
-      label.setAttribute("data-weekday", row);
-      label.textContent = i18n.ui("graph.weekdays")[row];
+      label.textContent = name;
       label.setAttribute("x", 0);
       label.setAttribute("y", TOP_GUTTER + row * PITCH + CELL * 0.8);
       svg.appendChild(label);
@@ -569,15 +331,9 @@
       clearTimeout(timer);
       generation = 0;
       svg.classList.remove("is-living");
-      wrap.setAttribute("aria-label", idleLabel());
+      wrap.setAttribute("aria-label", IDLE_LABEL);
       wrap.setAttribute("aria-pressed", "false");
     }
-
-    wrap.setAttribute("aria-label", idleLabel());
-    document.addEventListener("sitelanguagechange", function () {
-      refreshGraphLabels(svg);
-      wrap.setAttribute("aria-label", generation ? playingLabel() : idleLabel());
-    });
 
     function cellsEqual(a, b) {
       for (var i = 0; i < a.length; i++) {
@@ -594,7 +350,7 @@
       board.rects.forEach(function (rect, i) {
         rect.classList.toggle("is-alive", cells[i]);
       });
-      wrap.setAttribute("aria-label", playingLabel());
+      wrap.setAttribute("aria-label", PLAYING_LABEL);
       wrap.setAttribute("aria-pressed", "true");
 
       // Stop early once the board dies out or locks into a static shape,
